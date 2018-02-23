@@ -4,7 +4,9 @@
 
 如果想完全理解本文所涉及到的话题，你需要了解的背景知识有：
 
-* 什么是OpenId Connect \(OIDC\)Identity Server4又是什么
+* 什么是OpenId Connect \(OIDC\)
+
+* Identity Server4又是什么
 
 * ASP.NET Core的权限体系中的OIDC认证框架（客户端）
 
