@@ -11,3 +11,11 @@ asp.net core微服务实战视频: [http://video.jessetalk.cn/course/](http://vi
 
 ![](/assets/jessetalks_qrcode)
 
+[OIDC在ASP.NET Core中的应用](/chapter1.md)
+
+
+
+
+
+
+
