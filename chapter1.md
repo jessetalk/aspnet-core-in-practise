@@ -40,23 +40,13 @@ oAuth在这里麻烦的地方是我还需要再请求一次API去获取用户数
 
 > OIDC 建立在oAuth2.0协议之上，允许客户端\(Clients\)通过一个授权服务\(Authorization Server\)来完成对用户认证的过程，并且可以得到用户的一些基本信息包含在JWT中。
 
-
-
 # OIDC对oAuth进行了哪些扩展？
 
 在oAuth2.0授权码模式的帮助下，我们拿到了用户信息。
 
-![](/assets/oauth2_authorization_code_flow)
+![](/assets/authroization_code_flow)
 
 以上没有认证的过程，只是给我们的应用授权访问一个API的权限，我们通过这个API去获取当前用户的信息。
-
-* 通过添加ID Token的支持让OAuth2.0 支持用户认证
-* 
-
-
-
-
-
 
 
 
