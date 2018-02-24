@@ -46,7 +46,164 @@ oAuth在这里麻烦的地方是我还需要再请求一次API去获取用户数
 
 ![](/assets/authroization_code_flow)
 
-以上没有认证的过程，只是给我们的应用授权访问一个API的权限，我们通过这个API去获取当前用户的信息。
+以上没有认证的过程，只是给我们的应用授权访问一个API的权限，我们通过这个API去获取当前用户的信息。而OIDC给oAuth2进行扩展之后就填补了这个空白。它添加了以下两个内容：
+
+* response\_type 添加IdToken
+* 添加userinfo endpoint，用idToken可以获取用户信息
+
+我们先来看看IdToken
+
+在oAuth2的授权码模式的第一步，我们向authorize endpoint请求code的时候所传递的response\_type表示授权类型，原来只有固定值code。
+
+```
+GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz
+        &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
+```
+
+OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token，现在我们可以这样组合来使用。
+
+| "response\_type" value | Flow |
+| :--- | :--- |
+| code | Authorization Code Flow |
+| id\_token | Implicit Flow |
+| id\_token token | Implicit Flow |
+| code id\_token | Hybrid Flow |
+| code token | Hybrid Flow |
+| code id\_token token | Hybrid Flow |
+
+Implicit Flow也支持返回id token 同时新增 Hybird Flow
+
+| Property | Authorization Code Flow | Implicit Flow | Hybrid Flow |
+| :--- | :--- | :--- | :--- |
+| access token和id token都通过Authorization endpoint返回 | no | yes | no |
+| 两个token都通过token end point 返回 | yes | no | no |
+| 用户使用的端\(浏览器或者手机）无法查看token | yes | no | no |
+| Client can be authenticated | yes | no | yes |
+| 支持刷新token | yes | no | yes |
+| 不需要后端参与 | no | yes | no |
+|  |  |  |  |
+
+  
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
