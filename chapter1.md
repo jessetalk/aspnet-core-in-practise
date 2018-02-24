@@ -112,15 +112,76 @@ OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token�
 | 不需要后端参与 | no | yes | no |
 |  |  |  |  |
 
+我们来看一下通过Hybird如何获取 code、id_token、_以及access\_token，然后再用id\_token向userinfo endpoint请求用户信息。
+
+第一步：获取code，
+
+* response\_type=code id\_token 
+* scope=api1 openid profile 其中openid即为用户的唯一识别号
+
+```
+GET /connect/authorize?response_type=code id_token&client_id=postman&state=xyz&scope=api1 openid profile
+&nonce=7362CAEA-9CA5-4B43-9BA3-34D7C303EBA7
+        &redirect_uri=http://localhost:5001/oauth2/callback
+```
+
+ 当我们使用OIDC的时候，我们请求里面多了一个nonce的参数，与state有异曲同工之妙。我们给它一个guid值即可。
+
+第二步：我们的redirect\_uri在接收的时候即可以拿到code 和 id\_token
+
+```
+https://localhost:5001/oauth2/callback#
+code=c5eaaaca8d4538f69f670a900d7a4fa1d1300b26ec67fba2f84129f0ab4ffa35
+&id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6IjVjMzA5ZGIwYTE2OGEwOTgGtpbj0GVXNnkKhGdrzA
+&scope=openid%20profile%20api1&state=111271607
+```
+
+第三步：用code换access\_token\(这一步与oAuth2中的授权码模式一致）
+
+第四步：用access\_token向userinfo endpoint获取用户资料
+
+```
+Get http://localhost:5000/connect/userinfo
+Authorization Bearer access_token
+```
+
+返回的用户信息
+
+```
+{
+    "name": "scott",
+    "family_name": "liu",
+    "sub": "5BE86359-073C-434B-AD2D-A3932222DABE"
+}
+```
+
+以下是我们的流程示意图。
+
+![](/assets/oidc_userinfo_get)
+
+有人可能会注意到，在这里我们拿到的idtoken没有派上用场，我们的用户资料还是通过access\_token从userinfo endpoint里拿的。这里有两个区别：
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Identity Server4提供的OIDC认证服务
-
-
 
 Identity Server4是asp.net core2.0实现的一套oAuth2 和OIDC框架，用它我们可以很快速的搭建一套自己的认证和授权服务。我们来看一下用它如何快速实现OIDC认证服务。
 
 由于用户登录代码过多，完整代码可以加入ASP.NET Core QQ群 92436737获取。 此处仅展示配置核心代码。
 
-过程 
+过程
 
 * 新建asp.net core web应用程序
 * 添加identityserver4 nuget引用
@@ -145,7 +206,7 @@ app.UseIdentityServer();
 
 在测试的时候我们新建一个Config.cs来放一些配置信息
 
-api resources 
+api resources
 
 ```
 public static IEnumerable<ApiResource> GetApiResources()
@@ -186,7 +247,7 @@ public static IEnumerable<Client> GetClients()
                 new Client
                 {
                     ClientId = "postman",
- 
+
                     // no interactive user, use the clientid/secret for authentication
                     AllowedGrantTypes = GrantTypes.Code,
                     RedirectUris = { "https://localhost:5001/oauth2/callback" },
@@ -233,19 +294,7 @@ public static List<TestUser> GetTestUsers()
         }
 ```
 
-
-
 # ASP.NET Core的权限体系中的OIDC认证框架
-
-
-
-
-
-
-
-
-
-
 
 
 
