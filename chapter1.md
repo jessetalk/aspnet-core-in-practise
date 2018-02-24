@@ -318,14 +318,13 @@ Authority即我们的用identity server4搭建的认证授权服务器，而其�
 
 ![](/assets/userinfo_in_idtoken)
 
-这样我们就不需要再向userinfo endpoint发起请求，从id\_token中即可以获取到用户的信息。而有了identity server4的帮助，完成这一步只需要一句简单的配置即可：  
-
+这样我们就不需要再向userinfo endpoint发起请求，从id\_token中即可以获取到用户的信息。而有了identity server4的帮助，完成这一步只需要一句简单的配置即可：
 
 ```
 new Client
 {
     ClientId = "postman",
- 
+
     AlwaysIncludeUserClaimsInIdToken = true,
     AllowOfflineAccess=true,
 }
