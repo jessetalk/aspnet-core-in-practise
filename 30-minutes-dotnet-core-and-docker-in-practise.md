@@ -15,6 +15,8 @@
 * Mongo安装
 * MySQL安装
 * MySQL持久化 
+* asp.net core web api 镜像制作 
+* asp.net core web api + mysql容器运行 
 
 扩展
 
