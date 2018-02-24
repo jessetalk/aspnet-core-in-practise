@@ -8,13 +8,9 @@
 
 * OIDC 对oAuth进行了哪些扩展？
 
-* Identity Server4又是什么
-
-* ASP.NET Core的权限体系中的OIDC认证框架（客户端）
-
 * Identity Server4提供的OIDC认证服务（服务端）
 
-* 客户端与服务端的集成
+* ASP.NET Core的权限体系中的OIDC认证框架（客户端）
 
 ### 什么是 OIDC
 
@@ -80,18 +76,12 @@ POST /connect/token?grant_type=authorization_code&code=835d584d4bc96d46ce49e27eb
 }
 ```
 
-
-
 我们拿到access\_token之后，再把access\_token放到authorization头请求 api来获取用户的信息。在这里，这个api不是属于授权服务器提供的，而是属于资源服务器。
-
-
 
 OIDC给oAuth2进行扩展之后就填补了这个空白，让我们可以授权它添加了以下两个内容：
 
 * response\_type 添加IdToken
 * 添加userinfo endpoint，用idToken可以获取用户信息
-
-
 
 OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token，现在我们可以这样组合来使用。
 
@@ -108,9 +98,9 @@ OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token�
 
 * Authorization Code Flow授权码模式：保留oAuth2下的授权模式不变response\_type=code
 * Implicit Flow 隐式模式：在oAuth2下也有这个模式，主要用于客户端直接可以向授权服务器获取token，跳过中间获取code用code换accesstoken的这一步。在OIDC下，responsetype=token idtoken，也就是可以同时返回access\_token和id\_token。
-* Hybrid Flow 混合模式： 比较有典型的地方是从authorize endpoint 获取 code idtoken，这个时候id\_token可以当成认证。而可以继续用code获取access\_token去做授权，比隐式模式更安全。 
+* Hybrid Flow 混合模式： 比较有典型的地方是从authorize endpoint 获取 code idtoken，这个时候id\_token可以当成认证。而可以继续用code获取access\_token去做授权，比隐式模式更安全。
 
- 再来详细看一下这三种模式的差异：
+  再来详细看一下这三种模式的差异：
 
 | Property | Authorization Code Flow | Implicit Flow | Hybrid Flow |
 | :--- | :--- | :--- | :--- |
@@ -121,6 +111,137 @@ OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token�
 | 支持刷新token | yes | no | yes |
 | 不需要后端参与 | no | yes | no |
 |  |  |  |  |
+
+# Identity Server4提供的OIDC认证服务
+
+
+
+Identity Server4是asp.net core2.0实现的一套oAuth2 和OIDC框架，用它我们可以很快速的搭建一套自己的认证和授权服务。我们来看一下用它如何快速实现OIDC认证服务。
+
+由于用户登录代码过多，完整代码可以加入ASP.NET Core QQ群 92436737获取。 此处仅展示配置核心代码。
+
+过程 
+
+* 新建asp.net core web应用程序
+* 添加identityserver4 nuget引用
+* 依赖注入初始化
+
+```
+services.AddIdentityServer()
+                .AddDeveloperSigningCredential()
+                .AddInMemoryIdentityResources(Config.GetIdentityResources())
+                .AddInMemoryApiResources(Config.GetApiResources())
+                .AddInMemoryClients(Config.GetClients())
+                .AddTestUsers(Config.GetTestUsers());
+```
+
+* 中间件添加
+
+```
+app.UseIdentityServer();
+```
+
+* 配置
+
+在测试的时候我们新建一个Config.cs来放一些配置信息
+
+api resources 
+
+```
+public static IEnumerable<ApiResource> GetApiResources()
+        {
+            return new List<ApiResource>
+            {
+                new ApiResource("api1", "API Application"){
+                    UserClaims = { "role", JwtClaimTypes.Role }
+                }
+            };
+        }
+```
+
+identity resources
+
+```
+public static IEnumerable<IdentityResource> GetIdentityResources()
+        {
+            return new List<IdentityResource> {
+            new IdentityResources.OpenId(),
+            new IdentityResources.Profile(),
+            new IdentityResources.Email(),
+        };
+        }
+```
+
+clients
+
+我们要讲的关键信息在这里，client有一个AllowGrantTypes它是一个string的集合。我们要写进去的值就是我们在上一节讲三种模式: Code，Implict和Hybird。因为这三种模式决定了我们的response\_type可以请求哪几个值，所以这个地方一定不能写错。
+
+IdentityServer4.Models.GrantTypes这个枚举给我们提供了一些选项，实际上是把oAuth的4种和OIDC的3种进行了组保。
+
+```
+public static IEnumerable<Client> GetClients()
+        {
+            return new List<Client>
+            {
+                new Client
+                {
+                    ClientId = "postman",
+ 
+                    // no interactive user, use the clientid/secret for authentication
+                    AllowedGrantTypes = GrantTypes.Code,
+                    RedirectUris = { "https://localhost:5001/oauth2/callback" },
+
+                    // secret for authentication
+                    ClientSecrets =
+                    {
+                        new Secret("secret".Sha256())
+                    },
+
+                     AllowedScopes = new List<string>
+                    {
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        "api1"
+                    },
+
+                    AllowOfflineAccess=true,
+
+                },
+            };
+        }
+```
+
+users
+
+```
+public static List<TestUser> GetTestUsers()
+        {
+            return new List<TestUser> {
+            new TestUser {
+                SubjectId = "5BE86359-073C-434B-AD2D-A3932222DABE",
+                Username = "scott",
+                Password = "password",
+                Claims = new List<Claim> {
+
+                    new Claim(JwtClaimTypes.Name, "scott"),
+                    new Claim(JwtClaimTypes.FamilyName, "liu"),
+                    new Claim(JwtClaimTypes.Email, "scott@scottbrady91.com"),
+                    new Claim(JwtClaimTypes.Role, "user"),
+                }
+            }
+            };
+        }
+```
+
+
+
+# ASP.NET Core的权限体系中的OIDC认证框架
+
+
+
+
+
+
 
 
 
