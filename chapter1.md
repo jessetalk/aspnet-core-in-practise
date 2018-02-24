@@ -44,21 +44,54 @@ oAuth在这里麻烦的地方是我还需要再请求一次API去获取用户数
 
 在oAuth2.0授权码模式的帮助下，我们拿到了用户信息。
 
-![](/assets/authroization_code_flow)
+![](/assets/authroization_code_flow)以上没有认证的过程，只是给我们的应用授权访问一个API的权限，我们通过这个API去获取当前用户的信息，这些都是通过oAuth2的授权码模式完成的。 我们来看看oAuth2 授权码模式的流程：
 
-以上没有认证的过程，只是给我们的应用授权访问一个API的权限，我们通过这个API去获取当前用户的信息。而OIDC给oAuth2进行扩展之后就填补了这个空白。它添加了以下两个内容：
+第一步，我们向authorize endpoint请求code的时候所传递的response\_type表示授权类型，原来只有固定值code
+
+```
+GET /connect/authorize?response_type=code&client_id=postman&state=xyz&scope=api1
+        &redirect_uri=http://localhost:5001/oauth2/callback
+```
+
+第二步，上面的请求执行完成之后会返回301跳转至我们传过去的redirect\_uri并带上code
+
+```
+https://localhost:5001/oauth2/callback?code=835d584d4bc96d46ce49e27ebdbf272e40234d5f31097f63163f17da61fcd01c
+&scope=api1
+&state=111271607
+```
+
+第三步，用code换取access token
+
+```
+POST /connect/token?grant_type=authorization_code&code=835d584d4bc96d46ce49e27ebdbf272e40234d5f31097f63163f17da61fcd01c
+&redirect_uri=http://localhost:5001/oauth2/callback
+&client_id=postman
+&client_secret=secret
+```
+
+通过这个POST我们就可以得到access\_token
+
+```
+{
+    "access_token": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjV",
+    "expires_in": 3600,
+    "token_type": "Bearer"
+}
+```
+
+
+
+我们拿到access\_token之后，再把access\_token放到authorization头请求 api来获取用户的信息。在这里，这个api不是属于授权服务器提供的，而是属于资源服务器。
+
+
+
+OIDC给oAuth2进行扩展之后就填补了这个空白，让我们可以授权它添加了以下两个内容：
 
 * response\_type 添加IdToken
 * 添加userinfo endpoint，用idToken可以获取用户信息
 
-我们先来看看IdToken
 
-在oAuth2的授权码模式的第一步，我们向authorize endpoint请求code的时候所传递的response\_type表示授权类型，原来只有固定值code。
-
-```
-GET /authorize?response_type=code&client_id=s6BhdRkqt3&state=xyz
-        &redirect_uri=https%3A%2F%2Fclient%2Eexample%2Ecom%2Fcb HTTP/1.1
-```
 
 OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token，现在我们可以这样组合来使用。
 
@@ -66,12 +99,18 @@ OIDC对它进行了扩展，现在你有三个选择：code, id\_token和 token�
 | :--- | :--- |
 | code | Authorization Code Flow |
 | id\_token | Implicit Flow |
-| id\_token token | Implicit Flow |
-| code id\_token | Hybrid Flow |
-| code token | Hybrid Flow |
-| code id\_token token | Hybrid Flow |
+| id\_token token | Implicit Flow |
+| code id\_token | Hybrid Flow |
+| code token | Hybrid Flow |
+| code id\_token token | Hybrid Flow |
 
-Implicit Flow也支持返回id token 同时新增 Hybird Flow
+我们简单的来理解一下这三种模式：
+
+* Authorization Code Flow授权码模式：保留oAuth2下的授权模式不变response\_type=code
+* Implicit Flow 隐式模式：在oAuth2下也有这个模式，主要用于客户端直接可以向授权服务器获取token，跳过中间获取code用code换accesstoken的这一步。在OIDC下，responsetype=token idtoken，也就是可以同时返回access\_token和id\_token。
+* Hybrid Flow 混合模式： 比较有典型的地方是从authorize endpoint 获取 code idtoken，这个时候id\_token可以当成认证。而可以继续用code获取access\_token去做授权，比隐式模式更安全。 
+
+ 再来详细看一下这三种模式的差异：
 
 | Property | Authorization Code Flow | Implicit Flow | Hybrid Flow |
 | :--- | :--- | :--- | :--- |
@@ -82,126 +121,6 @@ Implicit Flow也支持返回id token 同时新增 Hybird Flow
 | 支持刷新token | yes | no | yes |
 | 不需要后端参与 | no | yes | no |
 |  |  |  |  |
-
-  
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
