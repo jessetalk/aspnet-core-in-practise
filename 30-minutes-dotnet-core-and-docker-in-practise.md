@@ -9,22 +9,20 @@
 * 资料卷
 * 网络
 
-练习 
+练习
 
 * Redis安装
 * Mongo安装
 * MySQL安装
 * MySQL持久化 
 
-扩展 
+扩展
 
 * docker-compose 打包部署
-* 
-
+* 自建镜像仓库
+* Gitalb CI 持续集成
 
 ## 
-
-
 
 
 
