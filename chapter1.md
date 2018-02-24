@@ -125,7 +125,7 @@ GET /connect/authorize?response_type=code id_token&client_id=postman&state=xyz&s
         &redirect_uri=http://localhost:5001/oauth2/callback
 ```
 
- 当我们使用OIDC的时候，我们请求里面多了一个nonce的参数，与state有异曲同工之妙。我们给它一个guid值即可。
+当我们使用OIDC的时候，我们请求里面多了一个nonce的参数，与state有异曲同工之妙。我们给它一个guid值即可。
 
 第二步：我们的redirect\_uri在接收的时候即可以拿到code 和 id\_token
 
@@ -161,19 +161,14 @@ Authorization Bearer access_token
 
 有人可能会注意到，在这里我们拿到的idtoken没有派上用场，我们的用户资料还是通过access\_token从userinfo endpoint里拿的。这里有两个区别：
 
- 
+1. userinfo endpoint是属于认证服务器实现的，并非资源服务器，有归属的区别 
+2. id\_token 是一个jwt，里面带有用户的唯一标识，我们在判断该用户已经存在的时候不需要再请求userinfo endpoint
 
+下图是对id\_token进行解析得到的信息：sub即subject\_id\(用户唯一标识 \)
 
+![](/assets/id_token_jwt)
 
-
-
-
-
-
-
-
-
-
+# 
 
 # Identity Server4提供的OIDC认证服务
 
