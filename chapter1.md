@@ -168,7 +168,7 @@ Authorization Bearer access_token
 
 ![](/assets/id_token_jwt)
 
-# 
+对jwt了解的同学知道它里面本身就可以存储用户的信息，那么id\_token可以吗？答案当然是可以的，我们将在介绍完identity server4的集成之后最后来实现。
 
 # Identity Server4提供的OIDC认证服务
 
@@ -243,11 +243,9 @@ public static IEnumerable<Client> GetClients()
                 {
                     ClientId = "postman",
 
-                    // no interactive user, use the clientid/secret for authentication
-                    AllowedGrantTypes = GrantTypes.Code,
+                    AllowedGrantTypes = GrantTypes.Hybird,
                     RedirectUris = { "https://localhost:5001/oauth2/callback" },
 
-                    // secret for authentication
                     ClientSecrets =
                     {
                         new Secret("secret".Sha256())
@@ -290,6 +288,36 @@ public static List<TestUser> GetTestUsers()
 ```
 
 # ASP.NET Core的权限体系中的OIDC认证框架
+
+在M
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
