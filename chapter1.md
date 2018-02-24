@@ -289,19 +289,47 @@ public static List<TestUser> GetTestUsers()
 
 # ASP.NET Core的权限体系中的OIDC认证框架
 
-在M
+在Microsoft.AspNetCore.All nuget引用中包含了Microsoft.AspNetCore.Authentication.OpenIdConnect即asp.net core OIDC的客户端。我们需要在依赖注入中添加以下配置：
+
+```
+services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "Cookies";
+                options.DefaultChallengeScheme = "oidc";
+            })
+          .AddCookie("Cookies")
+          .AddOpenIdConnect("oidc", options =>
+          {
+              options.SignInScheme = "Cookies";
+              options.Authority = "http://localhost:5000";
+              options.RequireHttpsMetadata = false;
+              options.ClientId = "postman";
+              options.ClientSecret = "secret";
+              options.ResponseType = "code id_token";
+              options.GetClaimsFromUserInfoEndpoint = true;
+              options.Scope.Add("api1");
+              options.Scope.Add("offline_access");
+          });
+```
+
+Authority即我们的用identity server4搭建的认证授权服务器，而其中的GetClaimsFromUserInfoEndpoint则会在拿到id\_token之后自动向userinfo endpoint请求用户信息并放到asp.net core的User Identity下。
+
+我们上面讲过，可以不需要请求userinfo endpoint, 直接将用户信息放到id\_token中。
+
+![](/assets/userinfo_in_idtoken)
+
+这样我们就不需要再向userinfo endpoint发起请求，从id\_token中即可以获取到用户的信息。而有了identity server4的帮助，完成这一步只需要一句简单的配置即可：  
 
 
+```
+new Client
+{
+    ClientId = "postman",
+ 
+    AlwaysIncludeUserClaimsInIdToken = true,
+    AllowOfflineAccess=true,
+}
+```
 
 
-
-
-
-
-
-1
-
-1
-
-111
 
