@@ -330,5 +330,7 @@ new Client
 }
 ```
 
+ 这样我们在拿到id\_token之后，里即包含了我们的用户信息。
 
+![](/assets/user_claims_in_id_token)
 
